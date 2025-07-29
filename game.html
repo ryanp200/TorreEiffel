@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find the Eiffel Tower Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        .game-container {
+            width: 100vw;
+            height: calc(100vh - 30vh);
+            position: relative;
+            overflow: hidden;
+            top: 15vh;
+        }
+        .block {
+            width: 80px;
+            height: 80px;
+            background-color: #ccc;
+            position: absolute;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+        .eiffel-tower {
+            width: 200px;
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            z-index: 0;
+        }
+        .message {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            z-index: 2;
+        }
+        .try-again {
+            color: red;
+        }
+        .result-message {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 36px;
+            color: green;
+            text-align: center;
+            z-index: 2;
+        }
+        .play-again {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        iframe {
+            width: 100vw;
+            height: 15vh;
+            border: none;
+            position: absolute;
+            left: 0;
+            z-index: 3;
+        }
+        #top-frame {
+            top: 0;
+        }
+        #bottom-frame {
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <iframe src="menu.html" id="top-frame"></iframe>
+    <div class="game-container">
+        <div class="message" id="message">Encontre a Torre Eiffel</div>
+        <div class="result-message" id="resultMessage">
+            <div id="finalMessage"></div>
+            <button class="play-again" id="playAgainButton">Jogar de novo</button>
+        </div>
+        <img src="https://pngimg.com/uploads/eiffel_tower/eiffel_tower_PNG66.png" alt="Torre Eiffel" class="eiffel-tower" id="eiffelTower">
+    </div>
+    <iframe src="rodape4.html" id="bottom-frame"></iframe>
+
+    <script>
+        const container = document.querySelector('.game-container');
+        const message = document.getElementById('message');
+        const resultMessage = document.getElementById('resultMessage');
+        const finalMessage = document.getElementById('finalMessage');
+        const playAgainButton = document.getElementById('playAgainButton');
+        const eiffelTower = document.getElementById('eiffelTower');
+        const initialNumberOfBlocks = 10;
+        let numberOfBlocks = initialNumberOfBlocks;
+        let blocks = [];
+        let gameActive = true;
+        let errorCount = 0;
+        let score = 0;
+        let correctBlockIndex = -1;
+
+        function getGameBoundaries() {
+            const rect = container.getBoundingClientRect();
+            return {
+                top: rect.top,
+                bottom: rect.bottom,
+                left: rect.left,
+                right: rect.right
+            };
+        }
+
+        function createBlock(x, y, isCorrect = false) {
+            const block = document.createElement('div');
+            block.className = 'block';
+            block.style.top = `${y}px`;
+            block.style.left = `${x}px`;
+
+            block.dataset.dx = (Math.random() * 2 - 1) * 2;
+            block.dataset.dy = (Math.random() * 2 - 1) * 2;
+
+            if (isCorrect) {
+                block.classList.add('correct');
+                correctBlockIndex = blocks.length;
+            }
+
+            block.addEventListener('click', () => {
+                if (!gameActive) return;
+                if (block.classList.contains('correct')) {
+                    container.removeChild(block);
+                    eiffelTower.style.display = 'block';
+                    message.textContent = '';
+                    resultMessage.style.display = 'block';
+                    finalMessage.textContent = 'Parabéns! Você encontrou a Torre Eiffel!';
+                    score += 100;
+                    gameActive = false;
+                } else {
+                    errorCount++;
+                    score -= 1;
+                    message.textContent = 'Que pena, você errou!';
+                    message.classList.add('try-again');
+                    addRandomBlock();
+
+                    if (errorCount % 2 === 0) {
+                        flashIncorrectBlocks();
+                    }
+
+                    if (errorCount >= 20) {
+                        endGame();
+                    } else {
+                        updateScoreboard();
+                    }
+                }
+            });
+
+            blocks.push(block);
+            container.appendChild(block);
+        }
+
+        function flashIncorrectBlocks() {
+            blocks.forEach(block => {
+                if (!block.classList.contains('correct')) {
+                    block.style.backgroundColor = 'red';
+                }
+            });
+
+            setTimeout(() => {
+                blocks.forEach(block => {
+                    if (!block.classList.contains('correct')) {
+                        block.style.backgroundColor = '#ccc';
+                    }
+                });
+            }, 100);
+        }
+
+        function addRandomBlock() {
+            const gameBounds = getGameBoundaries();
+            const x = Math.random() * (gameBounds.right - gameBounds.left - 80);
+            const y = Math.random() * (gameBounds.bottom - gameBounds.top - 80);
+            createBlock(x, y);
+        }
+
+        function createInitialBlocks() {
+            for (let i = 0; i < numberOfBlocks; i++) {
+                const gameBounds = getGameBoundaries();
+                const x = Math.random() * (gameBounds.right - gameBounds.left - 80);
+                const y = Math.random() * (gameBounds.bottom - gameBounds.top - 80);
+                createBlock(x, y, i === numberOfBlocks - 1);
+            }
+        }
+
+        function revealEiffelTower() {
+            eiffelTower.style.display = 'block';
+            blocks.forEach(block => {
+                if (block.classList.contains('correct')) {
+                    block.style.backgroundColor = 'green';
+                }
+            });
+            message.textContent = 'Você errou 30 vezes! A Torre Eiffel está escondida!';
+            finalMessage.textContent = 'Você perdeu o jogo!';
+            resultMessage.style.color = 'red';
+            resultMessage.style.display = 'block';
+            updateScoreboard();
+        }
+
+        function moveBlocks() {
+            if (!gameActive) return;
+
+            const gameBounds = getGameBoundaries();
+
+            blocks.forEach(block => {
+                let dx = parseFloat(block.dataset.dx);
+                let dy = parseFloat(block.dataset.dy);
+                let x = parseFloat(block.style.left);
+                let y = parseFloat(block.style.top);
+
+                x += dx;
+                y += dy;
+
+                if (x <= 0 || x >= gameBounds.right - gameBounds.left - 80) {
+                    dx = -dx;
+                }
+                if (y <= 0 || y >= gameBounds.bottom - gameBounds.top - 80) {
+                    dy = -dy;
+                }
+
+                block.style.left = `${Math.max(0, Math.min(gameBounds.right - gameBounds.left - 80, x))}px`;
+                block.style.top = `${Math.max(0, Math.min(gameBounds.bottom - gameBounds.top - 80, y))}px`;
+                block.dataset.dx = dx;
+                block.dataset.dy = dy;
+            });
+        }
+
+        function updateScoreboard() {
+            // Removed scoreboard update
+        }
+
+        function endGame() {
+            gameActive = false;
+            blocks.forEach(block => {
+                if (block.classList.contains('correct')) {
+                    block.style.backgroundColor = 'green';
+                } else {
+                    block.style.backgroundColor = 'red';
+                }
+            });
+            finalMessage.textContent = 'Jogo terminado! Você acumulou 20 erros.';
+            resultMessage.style.color = 'red';
+            resultMessage.style.display = 'block';
+        }
+
+        function resetGame() {
+            blocks.forEach(block => container.removeChild(block));
+            blocks = [];
+            numberOfBlocks = initialNumberOfBlocks;
+            errorCount = 0;
+            score = 0;
+            gameActive = true;
+            correctBlockIndex = -1;
+            eiffelTower.style.display = 'none';
+            message.textContent = 'Encontre a Torre Eiffel';
+            resultMessage.style.display = 'none';
+            createInitialBlocks();
+        }
+
+        playAgainButton.addEventListener('click', () => {
+            resetGame();
+        });
+
+        createInitialBlocks();
+        setInterval(moveBlocks, 20);
+    </script>
+</body>
+</html>

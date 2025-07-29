@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barra de Menu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100vw;
+            background-color: #000000;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            font-size: 24px;
+            color: white;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links li a {
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            padding: 15px 20px;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links li a:hover {
+            background-color: #161616;
+            color: #0400ff;
+        }
+
+        .navbar:hover {
+            padding: 30px;
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <section class="logo">Torre Eiffel</section>
+        <ul class="nav-links">
+            <li><a href="index.html" target="_top">Voltar</a></li>
+            <li><a href="site1.html" target="_top">História</a></li>
+            <li><a href="site2.html" target="_top">Características</a></li>
+            <li><a href="site3.html" target="_top">Curiosidades</a></li>
+            <li><a href="game.html" target="_top">Jogar</a></li>
+        </ul>
+    </nav>
+</body>
+</html>
